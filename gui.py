@@ -14,15 +14,22 @@ def download_version_main():
         print("\n所使用的文件夹不存在！请重新设置一个默认文件夹，然后再进行下载。")
         os.system("pause")
         return
-    respong = requests.head(VERSION_LIST_DOWNLOAD_URL)
     default = config_data["default_folder_uuid"]
-    if respong.headers.get("Last-Modified") != config_data["minecraft_folders"][default]["version_list_last_modified_time"]:
-        version_list = requests.get(VERSION_LIST_DOWNLOAD_URL).json()
+    if not os.path.exists(f"{config_data['minecraft_folders'][default]['path']}{os.sep}version_manifest.json"):
+        respong = requests.get(VERSION_LIST_DOWNLOAD_URL)
         config_data["minecraft_folders"][default]["version_list_last_modified_time"] = respong.headers.get("Last-Modified")
         save_config(config_data)
+        version_list = respong.json()
         dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
     else:
-        version_list = load_version_list(config_data["minecraft_folders"][default]["path"])
+        respong = requests.head(VERSION_LIST_DOWNLOAD_URL)
+        if respong.headers.get("Last-Modified") != config_data["minecraft_folders"][default]["version_list_last_modified_time"]:
+            version_list = requests.get(VERSION_LIST_DOWNLOAD_URL).json()
+            config_data["minecraft_folders"][default]["version_list_last_modified_time"] = respong.headers.get("Last-Modified")
+            save_config(config_data)
+            dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
+        else:
+            version_list = load_version_list(config_data["minecraft_folders"][default]["path"])
     option = input(r"""
 你想要下载哪个版本？
 
@@ -35,7 +42,7 @@ def download_version_main():
     match option:
         case "1":
             download_special_version(
-                get_client_manifest(version_list,version_list["latest"]["release"]),
+                get_client_manifest(version_list, version_list["latest"]["release"]),
                 minecraft_folder = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["path"],
                 has_multi_version = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["multi_version"],
                 check_hash = config_data["check_hash"],
@@ -332,6 +339,10 @@ Minecraft 文件夹管理
         print(f"    [{folder_index}] {config_data['minecraft_folders'][entry]['path']}{'（默认）' if entry == config_data['default_folder_uuid'] else ''}")
     print()
     folder_index = input("你想要操作哪个文件夹：")
+    if not folder_index:
+        print("你没有输入任何序号，请重新输入。", file = sys.stderr)
+        os.system("pause")
+        return minecraft_folder_management_main()
     try:
         folder_index = int(folder_index)
     except ValueError:
@@ -390,7 +401,7 @@ def about_main():
 作者：GetSoftwares
 
 一个纯粹的原版 Minecraft Java 版下载器。
-你知道吗？下载器的程序只花了三天时间就写完了。
+你知道吗？下载器的第一个版本只花了三天时间就写完了。
 """)
     os.system("pause")
     return
@@ -419,6 +430,10 @@ def title_main():
             return title_main()
         case "3":
             new_folder = input("你想要添加哪个文件夹：")
+            if not new_folder:
+                print("你没有输入要添加的文件夹的路径。请重新输入。", file = sys.stderr)
+                os.system("pause")
+                return title_main()
             if not os.path.isdir(new_folder):
                 print(f"{new_folder} 不是一个文件夹或不存在。请检查你的输入，然后再试一次。", file = sys.stderr)
             else:

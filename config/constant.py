@@ -12,4 +12,4 @@ VERSION_LIST_DOWNLOAD_URL = "https://launchermeta.mojang.com/mc/game/version_man
 RESOURCES_DOWNLOAD_URL = "https://resources.download.minecraft.net"
 
 PROJECT_NAME = "Vanilla Minecraft Downloader"
-PROJECT_VERSION = "1.0.0"
+PROJECT_VERSION = "1.0.1"
