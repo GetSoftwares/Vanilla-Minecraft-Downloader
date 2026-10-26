@@ -1,7 +1,7 @@
 __lazy__ = ["os", "os.path", "sys", "hashlib", "datetime", "copy"]
 
 import os, os.path, sys, hashlib, datetime as dt, copy
-from config import *
+from util import *
 
 def download_special_version(client_manifest, /, minecraft_folder: str, has_multi_version: bool, check_hash: bool, auto_retry: bool, show_log: bool, debug: bool):
     """下载指定版本的文件。传入的首个参数不是版本号，而是该版本的客户端清单。

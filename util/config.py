@@ -30,7 +30,7 @@ def load_config():
 
 def reset_default_setting(config_data):
     modified_config_data = config_data.copy()
-    modified_config_data.update({"check_hash": True, "auto_retry": True, "show_log": True})
+    modified_config_data.update({"check_hash": True, "auto_retry": True, "show_log": True, "debug": False})
     save_config(modified_config_data)
     return modified_config_data
 
@@ -46,9 +46,9 @@ def add_minecraft_folder(config_data, /, minecraft_folder: str):
     当添加前 Minecraft 文件夹列表为空时会同时将 minecraft_folder 设为默认文件夹。"""
     modified_config_data = config_data.copy()
     minecraft_folder = os.path.abspath(os.path.expandvars(minecraft_folder.replace('"', '')))
-    if not os.path.exists(minecraft_folder):
-        os.makedirs(minecraft_folder, exist_ok = True)
     new_folder_uuid = str(uuid.uuid4())
+    if not modified_config_data.get("minecraft_folders"):
+        modified_config_data["minecraft_folders"] = {}
     if len(modified_config_data["minecraft_folders"]) == 0:
         modified_config_data["default_folder_uuid"] = new_folder_uuid
     modified_config_data["minecraft_folders"][new_folder_uuid] = {
