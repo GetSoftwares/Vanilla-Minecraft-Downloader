@@ -90,7 +90,7 @@ Minecraft 文件夹管理
 除此以外，你还可以执行以下操作：
 
     [A] 添加一个文件夹
-    [B] 设置一个默认文件夹
+    [B] 设置默认文件夹
     [C] 更改当前文件夹的设置
     [D] 更改当前文件夹的路径
     [E] 删除一个文件夹
@@ -126,6 +126,13 @@ Minecraft 文件夹管理
                 new_path = input(f"请输入你想要更改的路径：")
                 if not new_path:
                     print("你没有输入任何路径。请重新输入。")
+                    os.system("pause")
+                    return minecraft_folder_management_page(config_data)
+                new_path = os.path.abspath(os.path.expandvars(new_path.replace('"', '')))
+                if not os.path.isdir(new_path):
+                    print(f"{new_path} 不是一个文件夹或不存在。请检查你的输入，然后再试一次。", file = sys.stderr)
+                elif check_folder_exists(config_data, new_path):
+                    print(f"{new_path} 已经存在！", file = sys.stderr)
                 else:
                     config_data = change_minecraft_folder_path(config_data, folder_uuid = folder_uuid, new_path = new_path)
                     print("更改文件夹路径成功！")
@@ -155,15 +162,18 @@ Minecraft 文件夹管理
         operation = index_or_operation
         match operation:
             case "A" | "a":
-                new_folder = input("请输入你想要添加的 Minecraft 文件夹的路径：")
-                if not new_folder:
+                new_path = input("请输入你想要添加的 Minecraft 文件夹的路径：")
+                if not new_path:
                     print("你没有输入要添加的文件夹的路径。请重新输入。", file = sys.stderr)
                     os.system("pause")
                     return minecraft_folder_management_page(config_data)
-                if not os.path.isdir(os.path.abspath(os.path.expandvars(new_folder.replace('"', '')))):
-                    print(f"{new_folder} 不是一个文件夹或不存在。请检查你的输入，然后再试一次。", file = sys.stderr)
+                new_path = os.path.abspath(os.path.expandvars(new_path.replace('"', '')))
+                if not os.path.isdir(new_path):
+                    print(f"{new_path} 不是一个文件夹或不存在。请检查你的输入，然后再试一次。", file = sys.stderr)
+                elif check_folder_exists(config_data, new_path):
+                    print(f"{new_path} 已经存在！", file = sys.stderr)
                 else:
-                    config_data = add_minecraft_folder(config_data, new_folder)
+                    config_data = add_minecraft_folder(config_data, new_path)
                     print("已成功添加文件夹。")
                 os.system("pause")
                 return minecraft_folder_management_page(config_data)
@@ -191,6 +201,13 @@ Minecraft 文件夹管理
                 new_path = input(f"请输入你想要更改的路径：")
                 if not new_path:
                     print("你没有输入任何路径。请重新输入。")
+                    os.system("pause")
+                    return minecraft_folder_management_page(config_data)
+                new_path = os.path.abspath(os.path.expandvars(new_path.replace('"', '')))
+                if not os.path.isdir(new_path):
+                    print(f"{new_path} 不是一个文件夹或不存在。请检查你的输入，然后再试一次。", file = sys.stderr)
+                elif check_folder_exists(config_data, new_path):
+                    print(f"{new_path} 已经存在！", file = sys.stderr)
                 else:
                     config_data = change_minecraft_folder_path(config_data, new_path = new_path)
                     print("更改文件夹路径成功！")

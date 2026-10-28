@@ -25,14 +25,14 @@ def title_main():
     [1] 下载一个版本
     [2] Minecraft 文件夹管理
     [3] 下载器设置
-    [4] 关于
-    [5] 退出
+    [4] 从其他启动器导入 Minecraft 文件夹
+    [5] 关于
+    [6] 退出
 """)
     option = input("请输入选项：")
     match option:
         case "1":
-            # 下载版本没有修改配置数据，不需要保存回溯
-            download_version_page(config_data)
+            config_data = download_version_page(config_data)
             return title_main()
         case "2":
             config_data = minecraft_folder_management_page(config_data)
@@ -41,9 +41,12 @@ def title_main():
             config_data = change_downloader_setting_page(config_data)
             return title_main()
         case "4":
-            about_main()
+            config_data = import_folders_page(config_data)
             return title_main()
         case "5":
+            about_main()
+            return title_main()
+        case "6":
             print("保存配置……")
             save_config(config_data)
             print("退出！")

@@ -9,21 +9,32 @@ def change_downloader_setting_page(config_data):
 
     1. [{'开' if config_data['check_hash'] else '关'}] 检查文件哈希
     2. [{'开' if config_data['auto_retry'] else '关'}] 自动重试
-    3. [{'开' if config_data['show_log'] else '关'}] 显示下载日志
-    4. [{'开' if config_data['debug'] else '关'}] 调试
-    5. 恢复默认设置
-    6. 退出
+    3. [{'开' if config_data['show_log'] else '关'}] 显示下载日志""")
+    match config_data["set_default_folder_when_import"]:
+        case "auto":
+            print("    4. [自动] 导入时设置默认文件夹")
+        case "on":
+            print("    4. [开] 导入时设置默认文件夹")
+        case "off":
+            print("    4. [关] 导入时设置默认文件夹")
+    print(f"""    5. [{'开' if config_data['debug'] else '关'}] 调试
+    6. 恢复默认设置
+    7. 退出
 
 设置说明：
 检查文件哈希：检查下载的文件的 SHA-1 哈希是否匹配。
 - 开：将检查下载的文件的 SHA-1 值是否与官方给出的 SHA-1 值匹配。这有助于确保下载到正确的文件。（默认值）
 - 关：将不检查下载的文件的 SHA-1 值是否与官方给出的 SHA-1 值匹配。
 自动重试：下载失败时自动重新下载文件，最多重新尝试五次（含第一次下载）。
-- 开：失败时自动重新下载。（默认值）
+- 开：失败时自动重新下载。（默认）
 - 关：失败时立即停止下载。
 显示下载日志：在下载版本是是否显示下载日志。
-- 开：将显示下载日志，有助于排查问题。（默认值）
+- 开：将显示下载日志，有助于排查问题。（默认）
 - 关：将不显示下载日志。
+导入时设置默认文件夹：从其他启动器导入文件夹时，将启动器的默认文件夹设置为下载器的默认文件夹。
+- 自动：当设置了下载器的默认文件夹时不设置，否则设为启动器的默认文件夹。（默认）
+- 开：始终将默认文件夹设置为启动器的默认文件夹。
+- 关：永远不会将启动器的默认文件夹设置为下载器的默认文件夹。
 调试：输出下载器的调试信息。
 - 开：输出调试信息，有助于排查问题
 - 关：不输出调试信息（默认）
@@ -91,6 +102,16 @@ def change_downloader_setting_page(config_data):
                     os.system("pause")
                     return change_downloader_setting_page(config_data)
         case "4":
+            setting_value = input("你想要将“导入时设置默认文件夹”更新为什么设置：（auto=自动，on=开，off=关）")
+            match setting_value:
+                case "auto" | "on" | "off":
+                    config_data["set_default_folder_when_import"] = setting_value
+                    print(f"已成功将“导入时设置默认文件夹”设为：{setting_value}")
+                case _:
+                    print(f"未知的设置：{setting_value}", file = sys.stderr)
+            os.system("pause")
+            return change_downloader_setting_page(config_data)
+        case "5":
             match config_data["debug"]:
                 case True:
                     config_data["debug"] = False
@@ -110,14 +131,14 @@ def change_downloader_setting_page(config_data):
                     print("未知的设置，已将“调试”重置为默认值：关", file = sys.stderr)
                     os.system("pause")
                     return change_downloader_setting_page(config_data)
-        case "5":
+        case "6":
             answer = input("你确定要恢复默认设置吗？（y/yes/是=确认，其他=取消）：")
             if answer.casefold() in YES_LIST:
                 config_data = reset_default_setting(config_data)
                 print("恢复默认设置成功！")
                 os.system("pause")
             return change_downloader_setting_page(config_data)
-        case "6":
+        case "7":
             return config_data
         case _:
             print("你没有输入对应的选项。请再试一次。", file = sys.stderr)

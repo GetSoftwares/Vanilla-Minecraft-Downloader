@@ -1,3 +1,4 @@
 from .download import download_version_page
 from .settings import change_downloader_setting_page
 from .folder_management import minecraft_folder_management_page
+from .import_folders import import_folders_page

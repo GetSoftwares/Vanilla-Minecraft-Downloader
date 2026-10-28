@@ -1,9 +1,11 @@
-__lazy__ = ["requests"]
+__lazy__ = ["requests", "urllib3"]
 
-import requests
+import requests, urllib3
 
 from module import *
 from util import *
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def download_version_page(config_data):
     os.system("cls")
@@ -17,27 +19,28 @@ def download_version_page(config_data):
         return
     default = config_data["default_folder_uuid"]
     if not os.path.exists(f"{config_data['minecraft_folders'][default]['path']}{os.sep}version_manifest.json"):
-        respong = requests.get(VERSION_LIST_DOWNLOAD_URL)
-        config_data["minecraft_folders"][default]["version_list_last_modified_time"] = respong.headers.get("Last-Modified")
+        response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False)
+        config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
         save_config(config_data)
-        version_list = respong.json()
+        version_list = response.json()
         dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
     else:
-        respong = requests.head(VERSION_LIST_DOWNLOAD_URL)
-        if respong.headers.get("Last-Modified") != config_data["minecraft_folders"][default]["version_list_last_modified_time"]:
-            version_list = requests.get(VERSION_LIST_DOWNLOAD_URL).json()
-            config_data["minecraft_folders"][default]["version_list_last_modified_time"] = respong.headers.get("Last-Modified")
+        response = requests.head(VERSION_LIST_DOWNLOAD_URL, verify=False)
+        if response.headers.get("Last-Modified") != config_data["minecraft_folders"][default]["version_list_last_modified_time"]:
+            version_list = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False).json()
+            config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
             save_config(config_data)
             dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
         else:
             version_list = load_version_list(config_data["minecraft_folders"][default]["path"])
-    option = input(r"""
+    option = input(f"""
 你想要下载哪个版本？
 
-    [1] 最新正式版
-    [2] 最新快照版
+    [1] 最新正式版（当前最新正式版：{version_list['latest']['release']}）
+    [2] 最新快照版（当前最新快照版：{version_list['latest']['snapshot']}）
     [3] 指定版本
-    [4] 退出下载
+    [4] 强制刷新版本列表
+    [5] 退出下载
 
 请输入：""")
     match option:
@@ -122,7 +125,16 @@ def download_version_page(config_data):
                 os.system("pause")
                 return download_version_page(config_data)
         case "4":
-            return
+            print("正在刷新版本列表……")
+            response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False)
+            dump_version_list(response.json(), config_data["minecraft_folders"][default]["path"])
+            config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
+            save_config(config_data)
+            print("刷新版本列表成功！")
+            os.system("pause")
+            return download_version_page(config_data)
+        case "5":
+            return config_data
         case _:
             print(f"你没有输入对应的选项。请再试一次。", file = sys.stderr)
             os.system("pause")

@@ -11,6 +11,7 @@ def generate_default_config():
         "check_hash": True,
         "auto_retry": True,
         "show_log": True,
+        "set_default_folder_when_import": "auto",
         "debug": False
     })
 
@@ -21,20 +22,31 @@ def save_config(config_data):
 
 def load_config():
     """加载配置文件。"""
-    config_data = json.load(open(CONFIG_SAVE_PATH, encoding = "utf-8"))
+    try:
+        config_data = json.load(open(CONFIG_SAVE_PATH, encoding = "utf-8"))
+    except:
+        generate_default_config()
+        config_data = json.load(open(CONFIG_SAVE_PATH, encoding = "utf-8"))
     config_data.setdefault("check_hash", True)
     config_data.setdefault("auto_retry", True)
     config_data.setdefault("show_log", True)
+    config_data.setdefault("set_default_folder_when_import", "auto")
     config_data.setdefault("debug", False)
     return config_data
 
 def reset_default_setting(config_data):
     modified_config_data = config_data.copy()
-    modified_config_data.update({"check_hash": True, "auto_retry": True, "show_log": True, "debug": False})
+    modified_config_data.update({
+        "check_hash": True,
+        "auto_retry": True,
+        "show_log": True,
+        "set_default_folder_when_import": "auto",
+        "debug": False
+    })
     save_config(modified_config_data)
     return modified_config_data
 
-def add_minecraft_folder(config_data, /, minecraft_folder: str):
+def add_minecraft_folder(config_data, /, minecraft_folder: str, _uuid: str | None = None, _set_default: bool = False):
     """添加 Minecraft 文件夹。
 
     参数：
@@ -46,7 +58,10 @@ def add_minecraft_folder(config_data, /, minecraft_folder: str):
     当添加前 Minecraft 文件夹列表为空时会同时将 minecraft_folder 设为默认文件夹。"""
     modified_config_data = config_data.copy()
     minecraft_folder = os.path.abspath(os.path.expandvars(minecraft_folder.replace('"', '')))
-    new_folder_uuid = str(uuid.uuid4())
+    if _uuid:
+        new_folder_uuid = _uuid
+    else:
+        new_folder_uuid = str(uuid.uuid4())
     if not modified_config_data.get("minecraft_folders"):
         modified_config_data["minecraft_folders"] = {}
     if len(modified_config_data["minecraft_folders"]) == 0:
@@ -57,7 +72,10 @@ def add_minecraft_folder(config_data, /, minecraft_folder: str):
         "april_fool_control": "auto",
         "version_list_last_modified_time": ""
     }
-    save_config(modified_config_data)
+    if _set_default:
+        modified_config_data = change_default_minecraft_folder(config_data, new_folder_uuid) # change_default_minecraft_folder() 函数会保存配置数据，无需重复保存
+    else:
+        save_config(modified_config_data)
     return modified_config_data
 
 def remove_minecraft_folder(config_data, /, folder_uuid: str):
@@ -114,3 +132,12 @@ def change_minecraft_folder_path(config_data, /, new_path: str, folder_uuid: str
         modified_config_data["minecraft_folders"][modified_config_data["default_folder_uuid"]]["path"] = new_path
     save_config(modified_config_data)
     return modified_config_data
+
+def check_folder_exists(config_data, folder_path):
+    """检查一个文件夹是否存在于文件夹列表中，这可避免重复添加文件夹。"""
+    if len(config_data["minecraft_folders"]) == 0:
+        return False
+    for folder in config_data["minecraft_folders"]:
+        if config_data["minecraft_folders"][folder]["path"] == folder_path:
+            return True
+    return False

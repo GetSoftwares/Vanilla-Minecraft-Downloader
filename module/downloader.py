@@ -30,6 +30,12 @@ def download_special_version(client_manifest, /, minecraft_folder: str, has_mult
         print("开始下载客户端……")
     client_jar = client_manifest["downloads"]["client"]["url"]
     if has_multi_version:
+        if os.path.exists(f"{minecraft_folder}{os.sep}versions{os.sep}{version}{os.sep}{version}.json"):
+            answer = input("你可能已通过其他启动器下载了该版本。你确定要下载该版本吗？（y/yes/是=确定，其他=取消）：")
+            if answer.casefold() not in YES_LIST:
+                print("你已取消下载该版本。")
+                os.system("pause")
+                return
         dump_client_manifest(client_manifest, minecraft_folder, has_multi_version)
         downloaded_jar = f"{minecraft_folder}{os.sep}versions{os.sep}{version}{os.sep}{version}.jar"
     else:

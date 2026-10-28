@@ -1,6 +1,8 @@
-__lazy__ = ['os', 'json', 'requests', 'sys', 'time']
+__lazy__ = ['os', 'json', 'requests', 'sys', 'time', 'urllib3']
 
-import os, json, requests, sys, time
+import os, json, requests, sys, time, urllib3
+
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def dump_version_list(version_list, save_path):
     """转储版本列表。
@@ -47,9 +49,9 @@ def get_client_manifest(version_list, version):
     try:
         for i in version_list["versions"]:
             if i["id"] == version:
-                client_manifest = requests.get(i["url"]).json()
+                client_manifest = requests.get(i["url"], verify = False).json()
                 return client_manifest
     except:
         print(f"暂时无法下载版本 {version} 的客户端清单。请稍后再试。")
-        time.sleep(3)
+        os.system("pause")
         sys.exit(1)
