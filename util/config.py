@@ -12,7 +12,8 @@ def generate_default_config():
         "auto_retry": True,
         "show_log": True,
         "set_default_folder_when_import": "auto",
-        "debug": False
+        "debug": False,
+        "ssl_verify": True
     })
 
 def save_config(config_data):
@@ -32,6 +33,7 @@ def load_config():
     config_data.setdefault("show_log", True)
     config_data.setdefault("set_default_folder_when_import", "auto")
     config_data.setdefault("debug", False)
+    config_data.setdefault("ssl_verify", True)
     return config_data
 
 def reset_default_setting(config_data):
@@ -41,7 +43,8 @@ def reset_default_setting(config_data):
         "auto_retry": True,
         "show_log": True,
         "set_default_folder_when_import": "auto",
-        "debug": False
+        "debug": False,
+        "ssl_verify": True
     })
     save_config(modified_config_data)
     return modified_config_data

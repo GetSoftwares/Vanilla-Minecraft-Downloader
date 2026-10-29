@@ -1,6 +1,6 @@
-__lazy__ = ['os', 'json', 'requests', 'sys', 'time', 'urllib3']
+__lazy__ = ['os', 'json', 'requests', 'sys', 'urllib3']
 
-import os, json, requests, sys, time, urllib3
+import os, json, requests, sys, urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -38,18 +38,20 @@ def dump_client_manifest(client_manifest, save_path, has_multi_version):
     else:
         json.dump(client_manifest, open(f"{save_path}{os.sep}client.json", "w", encoding = "utf-8"), ensure_ascii = False, indent = 4)
 
-def get_client_manifest(version_list, version):
+def get_client_manifest(version_list, version, /, ssl_verify):
     """获取指定版本的客户端清单。
 
     参数：
 
     version_list: 版本列表
 
-    version: 要获取的版本"""
+    version: 要获取的版本
+
+    ssl_verify: 是否进行 SSL 证书验证"""
     try:
         for i in version_list["versions"]:
             if i["id"] == version:
-                client_manifest = requests.get(i["url"], verify = False).json()
+                client_manifest = requests.get(i["url"], verify = ssl_verify).json()
                 return client_manifest
     except:
         print(f"暂时无法下载版本 {version} 的客户端清单。请稍后再试。")

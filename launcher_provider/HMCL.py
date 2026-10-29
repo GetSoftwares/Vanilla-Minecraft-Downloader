@@ -28,6 +28,10 @@ def import_folders_from_hmcl(config_data, launcher_path, /):
         folder_list = json.load(open(f"{launcher_path}{os.sep}.hmcl{os.sep}config{os.sep}game-directories.json", encoding = "utf-8"))
         launcher_config = json.load(open(f"{launcher_path}{os.sep}.hmcl{os.sep}config{os.sep}launcher-settings.json", encoding = "utf-8"))
         default_folder = launcher_config["selectedGameDirectory"]
+        if not folder_list["directories"]:
+            print("HMCL 没有任何 Minecraft 文件夹！", file = sys.stderr)
+            os.system("pause")
+            return config_data
         for folder in folder_list["directories"]:
             if os.path.isabs(folder["path"]):
                 folder_path = folder["path"]
@@ -42,12 +46,18 @@ def import_folders_from_hmcl(config_data, launcher_path, /):
                 print(f"正在导入文件夹 {folder_path}……")
             if folder["id"] == default_folder:
                 config_data = add_minecraft_folder(config_data, folder_path, folder_uuid, set_default)
+                if set_default:
+                    print(f"已将 {folder_path} 设为默认文件夹。")
             else:
                 config_data = add_minecraft_folder(config_data, folder_path, folder_uuid)
             success_imported_count += 1
     elif os.path.exists(f"{launcher_path}{os.sep}config.json"):
         launcher_config = json.load(open(f"{launcher_path}{os.sep}config.json", encoding = "utf-8"))
         default_folder = launcher_config["last"]
+        if not launcher_config["configurations"]:
+            print("HMCL 没有任何 Minecraft 文件夹！", file = sys.stderr)
+            os.system("pause")
+            return config_data
         for folder in launcher_config["configurations"]:
             if launcher_config["configurations"][folder]["useRelativePath"]:
                 folder_path = os.path.normpath(f"{launcher_path}{os.sep}{launcher_config['configurations'][folder]['gameDir']}")
@@ -59,8 +69,10 @@ def import_folders_from_hmcl(config_data, launcher_path, /):
                 continue
             if show_log:
                 print(f"正在导入文件夹 {folder_path}……")
-            if folder_path == default_folder:
+            if folder_path.casefold() == default_folder.casefold():
                 config_data = add_minecraft_folder(config_data, minecraft_folder = folder_path, _set_default = set_default)
+                if set_default:
+                    print(f"已将 {folder_path} 设为默认文件夹。")
             else:
                 config_data = add_minecraft_folder(config_data, folder_path)
             success_imported_count += 1

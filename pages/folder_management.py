@@ -146,8 +146,25 @@ Minecraft 文件夹管理
             case "4":
                 answer = input(f"你确定要删除 {config_data['minecraft_folders'][folder_uuid]['path']} 吗？（y/yes/是=删除，其他=保留）：")
                 if answer in YES_LIST:
-                    config_data = remove_minecraft_folder(config_data, folder_uuid)
-                    print("删除成功！")
+                    if len(config_data["minecraft_folders"]) == 1:
+                        if folder_uuid == config_data["default_folder_uuid"]:
+                            answer = input(f"你要删除的文件夹是唯一的文件夹。删除后将没有可用的 Minecraft 文件夹。你确定要删除唯一的文件夹吗？（y/yes/是=删除，其他=保留）：")
+                            if answer in YES_LIST:
+                                config_data = remove_minecraft_folder(config_data, folder_uuid)
+                                print("删除成功！")
+                            else:
+                                print("你已取消删除。")
+                    else:
+                        if folder_uuid == config_data["default_folder_uuid"]:
+                            answer = input(f"你要删除的是默认文件夹。删除默认文件夹将会重新设置一个默认文件夹。你确定要删除默认文件夹吗？（y/yes/是=删除，其他=保留）：")
+                            if answer in YES_LIST:
+                                config_data = remove_minecraft_folder(config_data, folder_uuid)
+                                print("删除成功！")
+                            else:
+                                print("你已取消删除。")
+                        else:
+                            config_data = remove_minecraft_folder(config_data, folder_uuid)
+                            print("删除成功！")
                 else:
                     print("你已取消删除。")
                 os.system("pause")
@@ -228,8 +245,25 @@ Minecraft 文件夹管理
                 folder_uuid = list(config_data["minecraft_folders"].keys())[folder_index - 1]
                 answer = input(f"你确定要删除 {config_data['minecraft_folders'][folder_uuid]['path']} 吗？（y/yes/是=删除，其他=保留）：")
                 if answer in YES_LIST:
-                    config_data = remove_minecraft_folder(config_data, folder_uuid)
-                    print("删除成功！")
+                    if len(config_data["minecraft_folders"]) == 1:
+                        if folder_uuid == config_data["default_folder_uuid"]:
+                            answer = input(f"你要删除的文件夹是唯一的文件夹。删除后将没有可用的 Minecraft 文件夹。你确定要删除唯一的文件夹吗？（y/yes/是=删除，其他=保留）：")
+                            if answer in YES_LIST:
+                                config_data = remove_minecraft_folder(config_data, folder_uuid)
+                                print("删除成功！")
+                            else:
+                                print("你已取消删除。")
+                    else:
+                        if folder_uuid == config_data["default_folder_uuid"]:
+                            answer = input(f"你要删除的是默认文件夹。删除默认文件夹将会重新设置一个默认文件夹。你确定要删除默认文件夹吗？（y/yes/是=删除，其他=保留）：")
+                            if answer in YES_LIST:
+                                config_data = remove_minecraft_folder(config_data, folder_uuid)
+                                print("删除成功！")
+                            else:
+                                print("你已取消删除。")
+                        else:
+                            config_data = remove_minecraft_folder(config_data, folder_uuid)
+                            print("删除成功！")
                 else:
                     print("你已取消删除。")
                 os.system("pause")

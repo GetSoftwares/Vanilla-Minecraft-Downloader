@@ -18,8 +18,9 @@ def change_downloader_setting_page(config_data):
         case "off":
             print("    4. [关] 导入时设置默认文件夹")
     print(f"""    5. [{'开' if config_data['debug'] else '关'}] 调试
-    6. 恢复默认设置
-    7. 退出
+    6. [{'开' if config_data['ssl_verify'] else '关'}] SSL 验证
+    7. 恢复默认设置
+    8. 退出
 
 设置说明：
 检查文件哈希：检查下载的文件的 SHA-1 哈希是否匹配。
@@ -36,8 +37,11 @@ def change_downloader_setting_page(config_data):
 - 开：始终将默认文件夹设置为启动器的默认文件夹。
 - 关：永远不会将启动器的默认文件夹设置为下载器的默认文件夹。
 调试：输出下载器的调试信息。
-- 开：输出调试信息，有助于排查问题
-- 关：不输出调试信息（默认）
+- 开：输出调试信息，有助于排查问题。
+- 关：不输出调试信息。（默认）
+SSL 验证：（调试性选项）在下载 Minecraft 时是否验证 SSL 证书。
+- 开：验证 SSL 证书。（默认）
+- 关：不验证 SSL 证书。可在验证 SSL 证书遇到问题时使用。
 """)
     setting = input("请输入要修改的设置项：")
     match setting:
@@ -132,13 +136,33 @@ def change_downloader_setting_page(config_data):
                     os.system("pause")
                     return change_downloader_setting_page(config_data)
         case "6":
+            match config_data["ssl_verify"]:
+                case True:
+                    config_data["ssl_verify"] = False
+                    save_config(config_data)
+                    print("已成功将“SSL 验证”设置为：关")
+                    os.system("pause")
+                    return change_downloader_setting_page(config_data)
+                case False:
+                    config_data["ssl_verify"] = True
+                    save_config(config_data)
+                    print("已成功将“SSL 验证”设置为：开")
+                    os.system("pause")
+                    return change_downloader_setting_page(config_data)
+                case _:
+                    config_data["ssl_verify"] = False
+                    save_config(config_data)
+                    print("未知的设置，已将“SSL 验证”重置为默认值：关", file = sys.stderr)
+                    os.system("pause")
+                    return change_downloader_setting_page(config_data)
+        case "7":
             answer = input("你确定要恢复默认设置吗？（y/yes/是=确认，其他=取消）：")
             if answer.casefold() in YES_LIST:
                 config_data = reset_default_setting(config_data)
                 print("恢复默认设置成功！")
                 os.system("pause")
             return change_downloader_setting_page(config_data)
-        case "7":
+        case "8":
             return config_data
         case _:
             print("你没有输入对应的选项。请再试一次。", file = sys.stderr)

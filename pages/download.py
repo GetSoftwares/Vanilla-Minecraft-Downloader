@@ -19,15 +19,30 @@ def download_version_page(config_data):
         return
     default = config_data["default_folder_uuid"]
     if not os.path.exists(f"{config_data['minecraft_folders'][default]['path']}{os.sep}version_manifest.json"):
-        response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False)
+        try:
+            response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify = config_data["ssl_verify"])
+        except:
+            print("当前暂时无法下载版本列表，请稍后再试。", file = sys.stderr)
+            os.system("pause")
+            return config_data
         config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
         save_config(config_data)
         version_list = response.json()
         dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
     else:
-        response = requests.head(VERSION_LIST_DOWNLOAD_URL, verify=False)
+        try:
+            response = requests.head(VERSION_LIST_DOWNLOAD_URL, verify = config_data["ssl_verify"])
+        except:
+            print("当前暂时无法获取版本列表的最后修改时间，请稍后再试。", file = sys.stderr)
+            os.system("pause")
+            return config_data
         if response.headers.get("Last-Modified") != config_data["minecraft_folders"][default]["version_list_last_modified_time"]:
-            version_list = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False).json()
+            try:
+                version_list = requests.get(VERSION_LIST_DOWNLOAD_URL, verify = config_data["ssl_verify"]).json()
+            except:
+                print("当前暂时无法下载版本列表，请稍后再试。", file = sys.stderr)
+                os.system("pause")
+                return config_data
             config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
             save_config(config_data)
             dump_version_list(version_list, config_data["minecraft_folders"][default]["path"])
@@ -46,7 +61,7 @@ def download_version_page(config_data):
     match option:
         case "1":
             download_special_version(
-                get_client_manifest(version_list, version_list["latest"]["release"]),
+                get_client_manifest(version_list, version_list["latest"]["release"], config_data["ssl_verify"]),
                 minecraft_folder = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["path"],
                 has_multi_version = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["multi_version"],
                 check_hash = config_data["check_hash"],
@@ -60,7 +75,7 @@ def download_version_page(config_data):
                 case "auto":
                     if config_data["minecraft_folders"][default]["multi_version"]:
                         download_special_version(
-                            get_client_manifest(version_list, version_list["latest"]["snapshot"]),
+                            get_client_manifest(version_list, version_list["latest"]["snapshot"], config_data["ssl_verify"]),
                             minecraft_folder = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["path"],
                             has_multi_version = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["multi_version"],
                             check_hash = config_data["check_hash"],
@@ -81,7 +96,7 @@ def download_version_page(config_data):
                     return download_version_page(config_data)
                 case "on":
                     download_special_version(
-                        get_client_manifest(version_list, version_list["latest"]["snapshot"]),
+                        get_client_manifest(version_list, version_list["latest"]["snapshot"], config_data["ssl_verify"]),
                         minecraft_folder = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["path"],
                         has_multi_version = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["multi_version"],
                         check_hash = config_data["check_hash"],
@@ -110,8 +125,14 @@ def download_version_page(config_data):
             version = input("请输入要下载的版本：")
             for i in version_list["versions"]:
                 if i["id"].casefold() == version.casefold():
+                    try:
+                        client_manifest = requests.get(i["url"], verify = config_data["ssl_verify"]).json()
+                    except:
+                        print(f"当前暂时无法下载 {i['id']} 版本的客户端清单，请稍后再试。")
+                        os.system("pause")
+                        return config_data
                     download_special_version(
-                        requests.get(i["url"]).json(),
+                        client_manifest,
                         minecraft_folder = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["path"],
                         has_multi_version = config_data["minecraft_folders"][config_data["default_folder_uuid"]]["multi_version"],
                         check_hash = config_data["check_hash"],
@@ -126,7 +147,12 @@ def download_version_page(config_data):
                 return download_version_page(config_data)
         case "4":
             print("正在刷新版本列表……")
-            response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify=False)
+            try:
+                response = requests.get(VERSION_LIST_DOWNLOAD_URL, verify = config_data["ssl_verify"])
+            except:
+                print(f"当前暂时无法刷新版本列表，请稍后再试。")
+                os.system("pause")
+                return config_data
             dump_version_list(response.json(), config_data["minecraft_folders"][default]["path"])
             config_data["minecraft_folders"][default]["version_list_last_modified_time"] = response.headers.get("Last-Modified")
             save_config(config_data)
