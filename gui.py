@@ -81,7 +81,7 @@ def main():
         case "ARM":
             os.environ["PATH"] = f"{os.path.join(os.path.dirname(sys.argv[0]), f'aria2{os.sep}x86')}{os.pathsep}{os.environ['PATH']}"
         case "ARM64":
-            if platform.version().split('.')[2] < 22000:
+            if int(platform.version().split('.')[2]) < 22000:
                 os.environ["PATH"] = f"{os.path.join(os.path.dirname(sys.argv[0]), f'aria2{os.sep}x86')}{os.pathsep}{os.environ['PATH']}"
             else:
                 os.environ["PATH"] = f"{os.path.join(os.path.dirname(sys.argv[0]), f'aria2{os.sep}x64')}{os.pathsep}{os.environ['PATH']}"
