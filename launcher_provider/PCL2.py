@@ -39,6 +39,9 @@ def import_folders_from_pcl2(config_data, launcher_path):
             folder_path = folder.split('>')
             if len(folder_path) == 2 and folder_path[1]:
                 folder_list.append(folder_path[1])
+        if config_data["import_preset_folder"]:
+            folder_list.append(f"{launcher_path}{os.sep}.minecraft")
+            folder_list.append(os.path.expandvars(r"%APPDATA%\.minecraft"))
         if len(folder_list) == 0:
             print("PCL2 没有任何合法的 Minecraft 文件夹！", file = sys.stderr)
             os.system("pause")

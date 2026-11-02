@@ -67,6 +67,7 @@ def download_version_page(config_data):
                 check_hash = config_data["check_hash"],
                 auto_retry = config_data["auto_retry"],
                 show_log = config_data["show_log"],
+                write_isolation_config = config_data["write_isolation_config"],
                 debug = config_data["debug"]
             )
             return download_version_page(config_data)
@@ -81,6 +82,7 @@ def download_version_page(config_data):
                             check_hash = config_data["check_hash"],
                             auto_retry = config_data["auto_retry"],
                             show_log = config_data["show_log"],
+                            write_isolation_config = config_data["write_isolation_config"],
                             debug = config_data["debug"]
                         )
                     else:
@@ -91,6 +93,7 @@ def download_version_page(config_data):
                             check_hash = config_data["check_hash"],
                             auto_retry = config_data["auto_retry"],
                             show_log = config_data["show_log"],
+                            write_isolation_config = config_data["write_isolation_config"],
                             debug = config_data["debug"]
                         )
                     return download_version_page(config_data)
@@ -102,6 +105,7 @@ def download_version_page(config_data):
                         check_hash = config_data["check_hash"],
                         auto_retry = config_data["auto_retry"],
                         show_log = config_data["show_log"],
+                        write_isolation_config = config_data["write_isolation_config"],
                         debug = config_data["debug"]
                     )
                     return download_version_page(config_data)
@@ -113,6 +117,7 @@ def download_version_page(config_data):
                         check_hash = config_data["check_hash"],
                         auto_retry = config_data["auto_retry"],
                         show_log = config_data["show_log"],
+                        write_isolation_config = config_data["write_isolation_config"],
                         debug = config_data["debug"]
                     )
                     return download_version_page(config_data)
@@ -138,6 +143,7 @@ def download_version_page(config_data):
                         check_hash = config_data["check_hash"],
                         auto_retry = config_data["auto_retry"],
                         show_log = config_data["show_log"],
+                        write_isolation_config = config_data["write_isolation_config"],
                         debug = config_data["debug"]
                     )
                     return download_version_page(config_data)

@@ -1,9 +1,19 @@
-__lazy__ = ["os", "os.path", "sys", "hashlib", "datetime", "copy"]
+__lazy__ = ["os", "os.path", "sys", "hashlib", "datetime", "copy", "json"]
 
-import os, os.path, sys, hashlib, datetime as dt, copy
+import os, os.path, sys, hashlib, datetime as dt, copy, json
 from util import *
 
-def download_special_version(client_manifest, /, minecraft_folder: str, has_multi_version: bool, check_hash: bool, auto_retry: bool, show_log: bool, debug: bool):
+def download_special_version(
+        client_manifest,
+    /,
+    minecraft_folder: str,
+    has_multi_version: bool,
+    check_hash: bool,
+    auto_retry: bool,
+    show_log: bool,
+    write_isolation_config: bool,
+    debug: bool
+):
     """下载指定版本的文件。传入的首个参数不是版本号，而是该版本的客户端清单。
 
     参数：
@@ -20,11 +30,25 @@ def download_special_version(client_manifest, /, minecraft_folder: str, has_mult
 
     show_log: 是否显示下载日志
 
+    write_isolation_config: 写入版本隔离设置
+
     debug: 是否输出调试信息"""
     version = client_manifest["id"]
     pending_download = {"libraries": [], "assets": []}
     retry_queue = copy.deepcopy(pending_download)
     hash_size_failed_queue = copy.deepcopy(pending_download)
+    match write_isolation_config:
+        case "on":
+            write_isolation_config = True
+        case "off":
+            write_isolation_config = False
+        case "auto":
+            if has_multi_version:
+                write_isolation_config = True
+            else:
+                write_isolation_config = False
+        case _:
+            raise ValueError(f"非法的 write_isolation_config 设置：{write_isolation_config}")
     # client.jar
     if show_log:
         print("开始下载客户端……")
@@ -484,15 +508,69 @@ def download_special_version(client_manifest, /, minecraft_folder: str, has_mult
         print("资源文件下载完毕！")
     # Done
     print(f"版本 {version} 下载完毕！")
+    if write_isolation_config:
+        # HMCL
+        if has_multi_version:
+            instance_config_file_new = f"{minecraft_folder}{os.sep}versions{os.sep}{version}{os.sep}.hmcl{os.sep}config{os.sep}instance-game-settings.json"
+            instance_config_file_old = f"{minecraft_folder}{os.sep}versions{os.sep}{version}{os.sep}hmclversion.cfg"
+        else:
+            instance_config_file_new = f"{minecraft_folder}{os.sep}.hmcl{os.sep}config{os.sep}instance-game-settings.json"
+            instance_config_file_old = f"{minecraft_folder}{os.sep}hmclversion.cfg"
+        if not os.path.exists(instance_config_file_new):
+            os.makedirs(os.path.dirname(instance_config_file_new), exist_ok = False)
+            json.dump({
+                "$schema": "https://schemas.glavo.site/hmcl/instance-game-settings/1.0.0",
+                "overrideProperties": [
+                    "runningDirectory"
+                ]
+            },
+            open(instance_config_file_new, "w", encoding = "utf-8"),
+            ensure_ascii = False, sort_keys = False, indent = 2)
+        else:
+            instance_game_settings = json.load(open(instance_config_file_new, "r", encoding = "utf-8"))
+            if instance_game_settings.get("overrideProperties") is None:
+                instance_game_settings["overrideProperties"] = ["runningDirectory"]
+            if instance_game_settings["overrideProperties"].count("runningDirectory") == 0:
+                instance_game_settings["overrideProperties"].append("runningDirectory")
+            json.dump(instance_game_settings, open(instance_config_file_new, "w", encoding = "utf-8"), ensure_ascii = False, sort_keys = False, indent = 2)
+        if not os.path.exists(instance_config_file_old):
+            json.dump({"gameDir": "", "gameDirType": 1 if has_multi_version else 0}, open(instance_config_file_old, "w", encoding = "utf-8"), ensure_ascii = False, sort_keys = False, indent = 2)
+        else:
+            hmclversion_cfg = json.load(open(instance_config_file_old, "r", encoding = "utf-8"))
+            if hmclversion_cfg.get("gameDirType") is None:
+                hmclversion_cfg["gameDirType"] = 1 if has_multi_version else 0
+            if hmclversion_cfg.get("gameDir") is None:
+                hmclversion_cfg["gameDir"] = ""
+            json.dump(hmclversion_cfg, open(instance_config_file_old, "w", encoding = "utf-8"), ensure_ascii = False, sort_keys = False, indent = 2)
+        print(f"版本 {version} 写入版本隔离设置完成！")
     os.system("pause")
     return
 
-def download_latest_none_april_fool_version(version_list, /, minecraft_folder: str, has_multi_version: bool, check_hash: bool, auto_retry: bool, show_log: bool, debug: bool):
+def download_latest_none_april_fool_version(
+    version_list,
+    /,
+    minecraft_folder: str,
+    has_multi_version: bool,
+    check_hash: bool,
+    auto_retry: bool,
+    write_isolation_config: str,
+    show_log: bool,
+    debug: bool
+):
     """下载最新的非愚人节版本。第一个参数是版本列表，后续参数见 download_special_version() 函数。"""
     for version in version_list["versions"]:
         release_time = dt.datetime.fromisoformat(version["releaseTime"])
         if (release_time.month, release_time.day) in [(3, 31), (4, 1), (4, 2)]:
             continue
         else:
-            download_special_version(get_client_manifest(version_list, version["id"]), minecraft_folder, has_multi_version, check_hash, auto_retry, show_log, debug)
+            download_special_version(
+                get_client_manifest(version_list, version["id"]),
+                minecraft_folder = minecraft_folder,
+                has_multi_version = has_multi_version,
+                check_hash = check_hash,
+                auto_retry = auto_retry,
+                show_log = show_log,
+                write_isolation_config = write_isolation_config,
+                debug = debug
+            )
             return

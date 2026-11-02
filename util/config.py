@@ -11,6 +11,8 @@ def generate_default_config():
         "check_hash": True,
         "auto_retry": True,
         "show_log": True,
+        "write_isolation_config": "auto",
+        "import_preset_folder": True,
         "set_default_folder_when_import": "auto",
         "debug": False,
         "ssl_verify": True
@@ -31,6 +33,8 @@ def load_config():
     config_data.setdefault("check_hash", True)
     config_data.setdefault("auto_retry", True)
     config_data.setdefault("show_log", True)
+    config_data.setdefault("write_isolation_config", "auto")
+    config_data.setdefault("import_preset_folder", True)
     config_data.setdefault("set_default_folder_when_import", "auto")
     config_data.setdefault("debug", False)
     config_data.setdefault("ssl_verify", True)
@@ -42,6 +46,8 @@ def reset_default_setting(config_data):
         "check_hash": True,
         "auto_retry": True,
         "show_log": True,
+        "write_isolation_config": "auto",
+        "import_preset_folder": True,
         "set_default_folder_when_import": "auto",
         "debug": False,
         "ssl_verify": True
